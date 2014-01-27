@@ -1,0 +1,14 @@
+/* 
+    Created on : 15-gen-2014, 15.56.45
+    Author     : Nisho
+*/
+
+html, body{width: 100%; height: 100%; padding: 0px;}
+#navbar{position: absolute; top:0; left:0; z-index: 998; width: 100%;}
+#page{ max-width: 100%; height: 100%;}
+#controls{ height: 100%;} 
+#controls .row:first-child {margin-top: 50px;}
+#demoCanvas{ height: 100%; padding:4px; padding-top: 50px;}
+.colore {width: 20px;height: 20px;display: inline-block;border: 1px solid black;margin-right: 10px;}
+#tooltip{position: absolute; top: 10px;margin: auto;width: 60%; display:none; left:20%; z-index: 999;}
+.button-reset {padding-left: 15px; padding-right: 15px;}
