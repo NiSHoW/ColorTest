@@ -36,9 +36,9 @@ colors = colors || {};
     };
     
     
-    Pointer.prototype.backgroundColor = '#FFDB01';     
+    Pointer.prototype.backgroundColor = '#222222';     
     
-    Pointer.prototype.borderColor = 'black';   
+    Pointer.prototype.borderColor = '#333333';   
     
     Pointer.prototype.borderSize = 2;   
     
@@ -57,22 +57,24 @@ colors = colors || {};
         var matrix = new createjs.Matrix2D();        
         matrix.rotate(this.angle);
         
-        console.info(this.angle, (this.angle * (180 / Math.PI))+"°");
+//        console.info(this.angle, (this.angle * (180 / Math.PI))+"°");
         
-        var pt = matrix.transformPoint(this.radiusPosition, 0);
-        this.graphics.moveTo(pt.x, pt.y);      
-        
+        var pt = matrix.transformPoint(this.radiusPosition + 20, 0);   
         this.graphics.setStrokeStyle(this.borderSize, 2, 2);
         this.graphics.beginStroke(this.borderColor).beginFill(this.backgroundColor);        
+        this.graphics.drawCircle(pt.x, pt.y, 5);
         
-        var pt = matrix.transformPoint(this.radiusPosition + 30, - 12);
-        this.graphics.lineTo(pt.x, pt.y);        
-        
-        var pt = matrix.transformPoint(this.radiusPosition + 25, 0);
-        this.graphics.lineTo(pt.x, pt.y);
-        
-        var pt = matrix.transformPoint(this.radiusPosition + 30, + 12);
-        this.graphics.lineTo(pt.x, pt.y);
+//        this.graphics.setStrokeStyle(this.borderSize, 2, 2);
+//        this.graphics.beginStroke(this.borderColor).beginFill(this.backgroundColor);        
+//        
+//        var pt = matrix.transformPoint(this.radiusPosition + 30, - 12);
+//        this.graphics.lineTo(pt.x, pt.y);        
+//        
+//        var pt = matrix.transformPoint(this.radiusPosition + 25, 0);
+//        this.graphics.lineTo(pt.x, pt.y);
+//        
+//        var pt = matrix.transformPoint(this.radiusPosition + 30, + 12);
+//        this.graphics.lineTo(pt.x, pt.y);
         
         this.graphics.closePath();    
 

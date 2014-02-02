@@ -1,0 +1,16 @@
+# Multiple Environment config, set this to the required environment name
+# SetEnv FUEL_ENV production
+
+Options +FollowSymLinks -Indexes
+RewriteEngine on
+
+# Remove index.php from URL
+RewriteCond %{HTTP:X-Requested-With}	!^XMLHttpRequest$
+RewriteCond %{THE_REQUEST}		^[^/]*/index\.php [NC]
+RewriteRule ^index\.php(.*)$		$1 [R=301,NS,L]
+
+# Send request via index.php (again, not if its a real file or folder)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^(.*)$ index.php?/$1 [QSA,L]
