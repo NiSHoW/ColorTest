@@ -6,6 +6,7 @@
  * @author Nisho
  */
 include_once APPLICATION_LIBS.'/TestController.php';
+
         
 
 class TestWSController extends TestController{
@@ -22,10 +23,15 @@ class TestWSController extends TestController{
         $this->template->colors = $session['TestWS']['colors'];
         $this->template->angle = $session['TestWS']['angle'];
         $this->template->infoEnabled = true;
+        $this->template->calibration = $this->readCalibrations();
         
-        if(Controller::isAjaxRequest()){
-            return $this->template->dispatchPartial('test/testws');
-        }         
+        if(defined('DEBUG')){
+            $this->template->debug = true;
+        }        
+        
+//        if(Controller::isAjaxRequest()){
+//            return $this->template->dispatchPartial('test/testws');
+//        }         
         return $this->template->dispatch('test/testws');
         
     }    
@@ -89,33 +95,38 @@ class TestWSController extends TestController{
         ); 
                 
         $colors = array();
-        $colorrows = file(TESTWA_COLORI_RIFERIMENTO);
-        
-        foreach($colorrows as $i => $row){
-            $lab = preg_split('/\s+/', $row);
-            if(count($lab) >= 3){
-                $c = $i % 3 ;
-                if($c == 0){
-                    $color = array();
-                    if($i == 0){
-                        $color['final'] = true;
-                    }            
-                    $color['max'] = array('L' => $lab[0],'a' =>  $lab[1],'b' =>  $lab[2]);
-                } elseif($c == 1){
-                    $color['lab'] = array('L' => $lab[0],'a' =>  $lab[1],'b' =>  $lab[2]);
-                } else {
-                    $color['min'] = array('L' => $lab[0],'a' =>  $lab[1],'b' =>  $lab[2]);
-                    $colors[] = $color;    
-                }
-            }    
+        $colorrows = parse_ini_file(TESTWS_COLORI_RIFERIMENTO, true);
+        foreach($colorrows as $id => $values){
+            $min = preg_split('/\s+/', ltrim($values['min']));
+            $lab = preg_split('/\s+/', ltrim($values['mid']));
+            $max = preg_split('/\s+/', ltrim($values['max']));
+            
+            $color = array(
+                'min' => array('L' => $min[0],'a' =>  $min[1],'b' =>  $min[2]),
+                'lab' => array('L' => $lab[0],'a' =>  $lab[1],'b' =>  $lab[2]),
+                'max' => array('L' => $max[0],'a' =>  $max[1],'b' =>  $max[2])
+            );
+            
+            if($id == 'GREEN'){
+                $color['final'] = true;
+            }            
+            
+            $colors[$id] = $color;   
         }
-        
+                    
         $angles = array(36, 72, 252, 278);
         $session['TestWS']['initColors'] = $colors;
-        $session['TestWS']['angle'] = $angles[rand(0, count($angles))];            
+        $session['TestWS']['angle'] = $angles[rand(0, (count($angles)) - 1)];
         
-        while(!shuffle($colors)){};        
-        $session['TestWS']['colors'] = $colors;
+        $keys = array_keys($colors);
+        while(!shuffle($keys)){};   
+        
+        $shuffledColor = array();
+        foreach($keys as $key){
+            $shuffledColor[$key] = $colors[$key];
+        }
+            
+        $session['TestWS']['colors'] = $shuffledColor;
         
         $this->setSession($session);
         return $session;
@@ -127,39 +138,30 @@ class TestWSController extends TestController{
         
         $session = $this->getSession();
         
-        $output = "";
-        $output = "Sessione utente: ".$_SESSION['sessionName']."\r\n";
-        $output = "inizio: ".date('d-m-y H:m:s', $session['TestWS']['startTime'])."\r\n";
-        $output = "fine: ".date('d-m-y H:m:s', $session['TestWS']['endTime'])."\r\n";
         
-        //output initcolors
-        $output .= "\r\nColori iniziali letti da file:\r\n";
-        foreach($session['TestWS']['initColors'] as $color){
-            $output .= "\t".$color['max']['L']."\t".$color['max']['a']."\t".$color['max']['b']."\r\n";
-            $output .= "\t".$color['lab']['L']."\t".$color['lab']['a']."\t".$color['lab']['b']."\r\n";
-            $output .= "\t".$color['min']['L']."\t".$color['min']['a']."\t".$color['min']['b']."\r\n\r\n";
+        $output = "";        
+        $output .= $_SESSION['sessionName']."\t";
+        $output .= "White\Black\t";
+        
+        foreach(array_keys($session['TestWS']['initColors']) as $id){
+            $color = $colors->{$id};
+            $output .= number_format($color->lab->L, 2, ',', '.')."\t".
+                       number_format($color->lab->a, 2, ',', '.')."\t".
+                       number_format($color->lab->b, 2, ',', '.')."\t";
+        }           
+        
+        foreach(array_keys($session['TestWS']['colors']) as $id){
+            $output .= $id{0}." ";
         }
         
-        $output .= "\r\nDisposizione Casuale dei color:\r\n";
-        foreach($colors as $color){
-            $output .= "\t".$color->labMax->L."\t".$color->labMax->a."\t".$color->labMax->b."\r\n";
-            $output .= "\t".$color->labMid->L."\t".$color->labMid->a."\t".$color->labMid->b."\r\n";
-            $output .= "\t".$color->labMin->L."\t".$color->labMin->a."\t".$color->labMin->b."\r\n\r\n";
-        }        
-             
-        $output .= "\r\nColori modificati dall'utente:\r\n";
-        foreach($colors as $color){
-            $output .= "\t".$color->lab->L."\t".$color->lab->a."\t".$color->lab->b."\r\n";
-        }   
-                
-        $this->filename = APPLICATION_RESULTS.'/'.$_SESSION['sessionName'].
-                date('d-m-y', $session['TestWS']['startTime']).'-WS.txt';
-       
+        $output .= "\t".$session['TestWS']['angle']."\n";        
+
+        $this->filename = $this->writeResult($output);
+        $session['TestWS']['output'] = $output;
         $session['TestWS']['filename'] = $this->filename;
-        $this->setSession($session);        
-        
-        file_put_contents($this->filename, $output);
-        return $this->filename;
+        $this->setSession($session);
+        return $this->filename;        
+              
     }
     
 }

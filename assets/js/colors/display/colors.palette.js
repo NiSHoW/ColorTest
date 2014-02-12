@@ -185,6 +185,7 @@ colors = colors || {};
     Palette.prototype.drawColorPalette = function(radius){      
         var $instance = this;
         this.radius = radius || this.radius;
+        console.info(this.radius)
         var angle = (Math.PI*2) / this.clovesNumber;
                     
         if(this.getNumChildren() !== this.clovesNumber){
@@ -201,7 +202,7 @@ colors = colors || {};
                 clove.color = this.colors[i];
                 clove.startAngle = startAngle;
                 clove.endAngle = endAngle;
-                clove.drawClove(radius);
+                clove.drawClove(this.radius);
                 clove.on("click", function(evt){
                     $instance.selectClove(this);
                 });
@@ -212,7 +213,8 @@ colors = colors || {};
         } else {
             for(var i = 0; i < this.getNumChildren(); i++){            
                 var clove = this.getChildAt(i);
-                clove.drawClove(radius);
+                clove.graphics.clear();
+                clove.drawClove(this.radius);
             }
         }                  
                 

@@ -28,6 +28,9 @@
       cookie_domain         : false,     // Will this cookie be attached to a domain, ie. '.notableapp.com'
       cookie_expires        : 365,       // set when you would like the cookie to expire.
       tip_container         : 'body',    // Where will the tip be attached
+      in_window             : false,     //Check if is in window
+      tip_offset_top        : 0,
+      tip_offset_left       : 0,
       tip_location_patterns : {
         top: ['bottom'],
         bottom: [], // bottom should not need to be repositioned
@@ -53,10 +56,9 @@
     },
 
     init : function (scope, method, options) {
-      Foundation.inherit(this, 'throttle delay');
-
-      this.settings = this.defaults;
-
+      Foundation.inherit(this, 'throttle delay');    
+      //extends options
+      this.settings = $.extend(this.defaults, options);      
       this.bindings(method, options)
     },
 
@@ -91,20 +93,22 @@
         .off('.joyride')
         .on('resize.fndtn.joyride', self.throttle(function () {
           if ($('[data-joyride]').length > 0 && self.settings.$next_tip) {
-            if (self.settings.exposed.length > 0) {
-              var $els = $(self.settings.exposed);
+            if(!self.settings.$next_tip.data('closed')){
+                if (self.settings.exposed.length > 0) {
+                  var $els = $(self.settings.exposed);
 
-              $els.each(function () {
-                var $this = $(this);
-                self.un_expose($this);
-                self.expose($this);
-              });
-            }
+                  $els.each(function () {
+                    var $this = $(this);
+                    self.un_expose($this);
+                    self.expose($this);
+                  });
+                }
 
-            if (self.is_phone()) {
-              self.pos_phone();
-            } else {
-              self.pos_default(false, true);
+                if (self.is_phone()) {
+                  self.pos_phone();
+                } else {
+                  self.pos_default(false, true);
+                }
             }
           }
         }, 100));
@@ -120,8 +124,9 @@
 
       if (!this.settings.init) this.events();
 
-      this.settings = $this.data('joyride-init');
-
+      //removed becouse for me is a not sense
+      //this.settings = $this.data('joyride-init');
+      
       // non configureable settings
       this.settings.$content_el = $this;
       this.settings.$body = $(this.settings.tip_container);
@@ -140,7 +145,6 @@
         this.settings.$tip_content.each(function (index) {
           var $this = $(this);
           this.settings = $.extend({}, self.defaults, self.data_options($this))
-
           // Make sure that settings parsed from data_options are integers where necessary
           for (var i = int_settings_count - 1; i >= 0; i--) {
             self.settings[integer_settings[i]] = parseInt(self.settings[integer_settings[i]], 10);
@@ -155,7 +159,6 @@
         } else {
           this.show('init');
         }
-
       }
     },
 
@@ -218,7 +221,6 @@
 
     show : function (init) {
       var $timer = null;
-
       // are we paused?
       if (this.settings.$li === undefined
         || ($.inArray(this.settings.$li.index(), this.settings.pause_after) === -1)) {
@@ -426,49 +428,71 @@
       }
 
       if (!/body/i.test(this.settings.$target.selector)) {
+          
+          var top = 0;
+          var left = 0;
+          
           if (this.bottom()) {
             if (this.rtl) {
-              this.settings.$next_tip.css({
-                top: (this.settings.$target.offset().top + nub_height + this.settings.$target.outerHeight()),
-                left: this.settings.$target.offset().left + this.settings.$target.outerWidth() - this.settings.$next_tip.outerWidth()});
+                top = (this.settings.$target.offset().top + nub_height + this.settings.$target.outerHeight());
+                left = (this.settings.$target.offset().left + this.settings.$target.outerWidth() - this.settings.$next_tip.outerWidth());
             } else {
-              this.settings.$next_tip.css({
-                top: (this.settings.$target.offset().top + nub_height + this.settings.$target.outerHeight()),
-                left: this.settings.$target.offset().left});
+                top = (this.settings.$target.offset().top + nub_height + this.settings.$target.outerHeight());
+                left = (this.settings.$target.offset().left);
             }
 
             this.nub_position($nub, this.settings.tip_settings.nub_position, 'top');
 
           } else if (this.top()) {
             if (this.rtl) {
-              this.settings.$next_tip.css({
-                top: (this.settings.$target.offset().top - this.settings.$next_tip.outerHeight() - nub_height),
-                left: this.settings.$target.offset().left + this.settings.$target.outerWidth() - this.settings.$next_tip.outerWidth()});
-            } else {
-              this.settings.$next_tip.css({
-                top: (this.settings.$target.offset().top - this.settings.$next_tip.outerHeight() - nub_height),
-                left: this.settings.$target.offset().left});
+                top = (this.settings.$target.offset().top - this.settings.$next_tip.outerHeight() - nub_height);
+                left = (this.settings.$target.offset().left + this.settings.$target.outerWidth() - this.settings.$next_tip.outerWidth());
+            } else {  
+                top = (this.settings.$target.offset().top - this.settings.$next_tip.outerHeight() - nub_height);
+                left = (this.settings.$target.offset().left);
             }
 
             this.nub_position($nub, this.settings.tip_settings.nub_position, 'bottom');
 
           } else if (this.right()) {
 
-            this.settings.$next_tip.css({
-              top: this.settings.$target.offset().top,
-              left: (this.outerWidth(this.settings.$target) + this.settings.$target.offset().left + nub_width)});
+              top = this.settings.$target.offset().top;
+              left = ((this.settings.$target.outerWidth() + this.settings.$target.offset().left + nub_width));
 
             this.nub_position($nub, this.settings.tip_settings.nub_position, 'left');
 
           } else if (this.left()) {
 
-            this.settings.$next_tip.css({
-              top: this.settings.$target.offset().top,
-              left: (this.settings.$target.offset().left - this.outerWidth(this.settings.$next_tip) - nub_width)});
+              top = this.settings.$target.offset().top;
+              left = ((this.settings.$target.offset().left - this.settings.$next_tip.outerWidth() - nub_width));
 
             this.nub_position($nub, this.settings.tip_settings.nub_position, 'right');
 
           }
+          
+          if(this.settings.tip_settings.in_window){
+             if(left + this.settings.$next_tip.outerWidth() > $(window).width()){
+                 left += ($(window).width() - (left + this.settings.$next_tip.outerWidth() + nub_width + 20));
+             }
+             if(top + this.settings.$next_tip.outerHeight() > $(window).height()){
+                 top += ($(window).height() - (top + this.settings.$next_tip.outerHeight() + nub_height + 20));
+             }              
+            
+             top += -10;
+          }
+          
+          if(this.settings.tip_settings.tip_offset_top !== 0){
+              top += +(this.settings.tip_settings.tip_offset_top);                          
+          }
+          
+          if(this.settings.tip_settings.tip_offset_left !== 0){
+              left += +(this.settings.tip_settings.tip_offset_left);
+          }
+          
+          this.settings.$next_tip.css({
+              top: top,
+              left: left
+          });
 
           if (!this.visible(this.corners(this.settings.$next_tip)) && this.settings.attempts < this.settings.tip_settings.tip_location_pattern.length) {
 
@@ -807,6 +831,7 @@
     },
 
     end : function () {
+
       if (this.settings.cookie_monster) {
         $.cookie(this.settings.cookie_name, 'ridden', { expires: this.settings.cookie_expires, domain: this.settings.cookie_domain });
       }
@@ -820,12 +845,11 @@
       }
 
       this.settings.$next_tip.data('closed', true);
-
       $('.joyride-modal-bg').hide();
       this.settings.$current_tip.hide();
       this.settings.post_step_callback(this.settings.$li.index(), this.settings.$current_tip);
       this.settings.post_ride_callback(this.settings.$li.index(), this.settings.$current_tip);
-      $('.joyride-tip-guide').remove();
+      //$('.joyride-tip-guide').remove();
     },
 
     off : function () {

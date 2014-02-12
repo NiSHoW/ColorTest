@@ -83,4 +83,17 @@ self.console = self.console || {
 	return this.replace( /^\s+|\s+$/g, '' );
     };
     
+    
+    String.prototype.replaceAll = function(search, replace){
+        if(replace === undefined) 
+            return this;
+        search = search.replace('{', '\{');
+        search = search.replace('}', '\}');
+        return this.replace(new RegExp(search, 'g'), replace);
+    };
+       
+    Math.randomIn = function(min, max){
+        return Math.random() * (max - min) + min;
+    };
+        
 }());

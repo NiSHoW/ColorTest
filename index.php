@@ -1,4 +1,6 @@
 <?php
+
+ini_set('session.gc_maxlifetime', 86400); // 24 hours
 /**
  * Bootstrap Script
  */
@@ -8,7 +10,8 @@ define('APPLICATION_CONTROLLERS', APPLICATION_PATH.'/controllers');
 define('APPLICATION_TEMPLATES', APPLICATION_PATH.'/templates');
 define('APPLICATION_RESULTS', dirname(__FILE__).'/results');
 
-define('TESTWA_COLORI_RIFERIMENTO', APPLICATION_PATH.'/colori_riferimento.txt');
+define('CALIBRAZIONE', APPLICATION_PATH.'/calibrazione.txt');
+define('TESTWS_COLORI_RIFERIMENTO', APPLICATION_PATH.'/colori_riferimento_sat.txt');
 define('TESTL_COLORI_RIFERIMENTO', APPLICATION_PATH.'/colori_riferimento.txt');
 
 //initialize session
@@ -41,6 +44,8 @@ if(!isset($_SESSION['sessionName']) &&
    $controller != 'login'){
     $controller = 'login';
     $action = 'index';    
+} else if($_SESSION['sessionName'] == 'admin'){
+    define('DEBUG', true);
 }
 
 //GENERATE CONTROLLER

@@ -1,0 +1,16 @@
+[calibrazione]
+xR=0.64
+yR=0.33
+zR=0.03
+xG=0.30
+yG=0.60
+zG=0.1
+xB=0.15
+yB=0.06
+zB=0.79
+xW=0.3127
+yW=0.329
+zW=0.3583
+gamma_R=2.2
+gamma_G=2.2
+gamma_B=2.2

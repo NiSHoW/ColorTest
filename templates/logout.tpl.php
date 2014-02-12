@@ -6,8 +6,8 @@ $this->sections->title = "Login";
 </style>
 <div id="page-background">
     <div id="logout-content" class="row">
-      <div class="small-4 columns large-centered">
-          <div class="panel">Grazie!</div>
+      <div class="large-4 small-8 large-centered small-centered columns">
+          <div class="panel">Bel lavoro, grazie!</div>
           <meta http-equiv="refresh" content="5; '<?php echo $this->basePath ?>'">
       </div>
     </div> 

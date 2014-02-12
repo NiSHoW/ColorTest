@@ -3,19 +3,109 @@
     Author     : Nisho
 */
 
-html, body{width: 100%; height: 100%; padding: 0px;}
+html, body{width: 100%; height: 100%; padding: 0px; position:fixed;}
 #navbar{position: absolute; top:0; left:0; z-index: 998; width: 100%; }
 #page{ max-width: 100%; height: 100%;}
 #page-background { background-image: url('../images/background.jpg'); 
 background-size: 100% 100%; background-color:#111111; width: 100%; 
-height: 100%; position: absolute; top: 0;}
-#controls{ height: 100%;} 
+height: 100%; position: fixed; top: 0;}
+#controls{ height: 100%;overflow: auto;padding-top: 55px;} 
 #controls .row:first-child {margin-top: 50px;}
 #demoCanvas{ height: 100%; padding:4px; padding-top: 50px;}
-.colore {width: 20px;height: 20px;display: inline-block;border: 1px solid black;margin-right: 10px;}
+.colore { width: 100%; height: 20px;display: inline-block;border: 1px solid black;margin-right: 10px;}
+.colore.debug {width: 20px;}
 #tooltip{position: absolute; top: 10px;margin: auto;width: 60%; display:none; left:20%; z-index: 999;}
 .top-spaced {margin-top: 70px;}
 .button-reset {padding-left: 15px; padding-right: 15px;}
-.autocenter {margin:auto}
+.autocenter {margin:auto;}
+.block {display: block}
+.color-text{font-size:1rem;position: relative; top: -2px;display: none;}
+.color-text.debug{display:inline}
 #info{}
 #logout {}
+.color-edit-container{padding: 1rem;}
+.ui-slider {margin-bottom: 10px; margin-top: 6px;}
+.plus-button, .mins-button {height: 10px; margin-bottom: 4px; padding-left: 5px;padding-right: 5px;padding-top: 4px;padding-bottom: 4px;height: 26px;}
+/*#save-container{position: fixed;right: 20px;bottom: 20px;z-index: 9999;}
+#save{margin: 0;}*/
+.joyride-tip-guide{
+    background: #616060;
+}
+.joyride-tip-guide .joyride-nub,
+.joyride-tip-guide .joyride-nub.left,
+.joyride-tip-guide .joyride-nub.top,
+.joyride-tip-guide .joyride-nub.bottom,
+.joyride-tip-guide .joyride-nub.right,
+.joyride-tip-guide .joyride-nub.top-right,
+.joyride-tip-guide .joyride-nub.top-left,
+.joyride-tip-guide .joyride-nub.bottom-right,
+.joyride-tip-guide .joyride-nub.bottom-left,
+.joyride-tip-guide .joyride-nub.right-bottom,
+.joyride-tip-guide .joyride-nub.left-bottom{
+    border: 10px solid #616060;
+    border-color: #616060 !important;
+    border-top-color: transparent !important;
+    border-left-color: transparent !important;
+    border-bottom-color: transparent !important;    
+}
+.joyride-tip-guide .joyride-nub.top-right {
+  border-top-style: solid;
+    border-color: #616060 !important;
+  border-top-color: transparent !important;
+  border-left-color: transparent !important;
+  border-right-color: transparent !important;
+  top: -20px; 
+  right: 10px;
+  left: auto;
+}
+.joyride-tip-guide .joyride-nub.bottom-right {
+        border-color: #616060 !important;
+    border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+    border-right-color: transparent !important;
+    bottom: -20px;
+    right: 20px;
+    left: auto;
+}
+.joyride-tip-guide .joyride-nub.right-bottom {
+  right: -20px; 
+  bottom: 20px;
+}
+.joyride-tip-guide .joyride-nub.left-bottom {
+  left: -20px; 
+  bottom: 20px;
+}
+.output pre {
+    background-color: white;
+    padding: 10px;
+    font-size: 0.90rem;
+}
+
+@media only screen and (max-width: 40.063em) {
+    .joyride-tip-guide {
+        max-height: 300px;
+    }
+    .joyride-content-wrapper{
+        overflow: auto;
+        position: relative;
+        max-height: 300px; 
+    }
+}
+
+@media only screen and (max-height: 40.063em) {
+    .joyride-tip-guide {
+        max-height: 300px;        
+    }
+    .joyride-content-wrapper{
+        overflow: auto;
+        position: relative;
+        max-height: 300px;
+    }
+}
+
+
+@media only screen and (min-width: 80.063em) {
+    .joyride-tip-guide {
+        width: 500px;
+    }
+}

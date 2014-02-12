@@ -1,46 +1,95 @@
 <?php 
 $this->sections->title = "Seleziona Test";
 ?>        
-<style>.max-height{max-height: 377px; overflow: auto;}</style>
-<div id="page-background">
-    <div class="top-spaced">
-        <div class="row">
+<style>
+    html, body{position: relative;}
+    .max-height{max-height: 377px; overflow: auto;}
+</style>
+<div id="page-background"></div>
+<div class="top-spaced"></div>     
 
-            <div class="large-5 small-push-1 columns">
-                <div class="panel">
-                    <h3>TEST BIANCO NERO</h3>
-                    <p class="max-height">
-                    Istruzioni per il partecipante da scrivere a sinistra (al posto delle barre di scorrimento, che compariranno dopo che il partecipante avrà segnalato [il come sarà deciso da Corradini] di averle lette)<br/>
-                    Il compito consiste nel fare apparire i cinque settori del disco, diversamente colorati, sullo stesso piano, ovvero tutti alla stessa distanza dall’osservatore (nessuno deve apparire più vicino o lontano degli altri).<br/>
-                    Se visivamente le sembrerebbe possibile infilare un coltello sotto uno dei settori, vuol dire che quel settore appare davanti agli altri e che di conseguenza va aggiustato.<br/>
-                    Usando la barra laterale, e rendendo i colori più chiari o più scuri, si può farli apparire più vicini o più lontani dall’osservatore. Il compito richiede quindi di regolare la barra in modo continuo, o a salti piccoli (cliccando sulle freccette nere laterali) o grandi (cliccando sugli spazi bianchi della barra), sinché ogni settore appaia sullo stesso piano degli atri. <br/>
-                    […  Si consiglia di spostare la barra inzialmente con movimenti lenti e ampi in modo da vedere il settore andare avanti e indietro, così da rendersi conto di quale possa essere una posizione coplanare da raggiungere con aggiustamenti più fini…]   questa parte può essere spiegata e fatta vedere nel training iniziale.<br/>
-                    Prima di finire e salvare i risultati, osservare in modo globale tutto il disco e vedere se qualche settore sporge in avanti o va indietro rispetto gli altri. In questo caso aggiustare ancora il colore o i colori che abbiano bisogno di essere spostati in avanti o indietro.  <br/>
-                    </p>
-                    <div class="row text-center">
-                        <?php if($this->statusTestWS == 'complete'): ?>
-                            <a href="<?php echo $this->basePath ?>testWS/exportFile" target="_blank" class="button">ESPORTA RISULTATO</a>            
-                        <?php else: ?>
-                            <a href="<?php echo $this->basePath ?>testWS" class="button">INIZIA</a>            
-                        <?php endif; ?>        
-                    </div>
-                </div>
-            </div>
+<div class="row">
 
-            <div class="large-5 small-pull-1 columns">
-                <div class="panel">
-                    <h3>TEST LUMINOSITA'</h3>
-                    <p class="max-height">Descrizione Test luminosità</p>
-                    <div class="row text-center">
-                        <?php if($this->statusTestL == 'complete'): ?>
-                              <a href="<?php echo $this->basePath ?>testL/exportFile" target="_blank" class="button">ESPORTA RISULTATO</a>              
-                        <?php else: ?>
-                            <a href="<?php echo $this->basePath ?>testL" class="button">INIZIA</a>            
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-
+    <div class="large-10 small-10 large-push-1 small-push-1">
+        <div class="panel">
+            <p>L'esperimento analizza il rapporto tra colore e forma e in particolare il ruolo giocato dal 
+            colore nella percezione di profondit&agrave; delle superfici visive.</p>
+            <p>Il compito dei partecipanti &egrave; di modificare il colore di quattro quadranti di un cerchio, 
+            facendo uso delle barre laterali, in modo che tutti appaiano complanari, ovvero 
+            nessuno "sopra" o "sotto" un altro, o pi&ugrave; vicino o pi&ugrave; lontano dall'osservatore degli altri.</p>
+            <p>Scegliere a caso uno dei due esperimenti</p>
         </div>
-    </div>          
+    </div>
+
+    <div class="large-10 small-10 large-push-1 small-push-1">
+        <div class="panel">
+            <div class="row">   
+                <?php if($this->statusTestWS !== 'complete'): ?>
+                    <div class="large-10 medium-9 columns">
+                        <h5>Esperimento F</h5>
+                        <p></p>
+                    </div>
+                    <div class="large-2 medium-3 columns">
+                        <a href="<?php echo $this->basePath ?>testWS" class="button autocenter block">INIZIA</a>            
+                    </div>
+                <?php else: ?>
+                <div class='columns large-12 small-12'>
+                    <div class="large-12 small-12">
+                        <h5>Esperimento F</h5>
+                        <p></p>
+                    </div>
+                    <div class="large-12 small-12 output">
+                        <label>Dati registrati</label>
+                        <pre><?php echo $this->outputTestWS ?></pre>
+                    </div>                
+                </div>                    
+                <?php endif; ?>                    
+            </div>                        
+        </div>
+    </div>
+
+    <div class="large-10 small-10 large-push-1 small-push-1">
+        <div class="panel">
+            <div class="row">    
+                <?php if($this->statusTestL !== 'complete'): ?>                    
+                    <div class="large-10 medium-9 columns">
+                        <h5>Esperimento 6</h5>
+                        <p></p>
+                    </div>
+                    <div class="large-2 medium-3 columns">
+                        <a href="<?php echo $this->basePath ?>testL" class="button autocenter block">INIZIA</a>            
+                    </div>
+                <?php else: ?>
+                <div class='columns large-12 small-12'>
+                    <div class="large-12 small-12">
+                        <h5>Esperimento 6</h5>
+                        <p></p>
+                    </div>
+                    <div class="large-12 small-12 output">                        
+                        <label>Dati registrati</label>
+                        <pre><?php echo $this->outputTestL ?></pre>
+                    </div>         
+                </div>                      
+                <?php endif; ?>                        
+            </div>                        
+        </div>
+    </div> 
+
+    <?php if($this->statusTestL == 'complete' && $this->statusTestWS == 'complete'): ?>
+        <div class="large-10 small-10 large-push-1 small-push-1">
+            <div class="panel">
+                <div class="row">    
+                    <div class="large-10 columns">
+                        <h5>Grazie</h5>
+                        <p>Ha eseguito tutti gli esperimenti a disposizione, La ringraziamo e le chiediamo di procedere con il logout</p>
+                    </div>
+                    <div class="large-2 columns">
+                        <a href="<?php echo $this->basePath ?>login/logout" class="button autocenter block">LOGOUT</a>            
+                    </div>
+                </div>                        
+            </div>
+        </div>
+    <?php endif; ?>                  
+
 </div>
+

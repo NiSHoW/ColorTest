@@ -33,6 +33,9 @@ colors = colors || {};
     Clove.prototype.endAngle = Math.PI*2/5;
     
     Clove.prototype.span = 10;
+    
+    Clove.prototype._colorChangeListener = null;
+    
     /**
      * Override draw metod
      * @param {type} width
@@ -48,6 +51,15 @@ colors = colors || {};
         var numSeg = Math.ceil(radius/this.segments);
         var color = this.color;   
         if(this.color instanceof colors.Color){
+            if(this._colorChangeListener === null){
+                var $this = this;
+                this._colorChangeListener = {
+                    onColorChange: function(color){
+                        $this.updateClove();
+                    }
+                };            
+                color.addOnColorChangeListeners(this._colorChangeListener);
+            }
             color = this.color.cssRGB();
         }
 

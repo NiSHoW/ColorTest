@@ -14,15 +14,19 @@ this.colors = this.colors || {};
      * Color class
      * @returns {undefined}
      */
-    var Color = function(lab) {
+    var Color = function(lab, id) {
+        this.id = id;
         this.lab = {L: lab.L, a:lab.a, b:lab.b};
         this.rgb = {r: 0, g:0, b:0};
         this.xyz = {x: 0, y:0, z:0};
         this.labMid = {L: lab.L, a:lab.a, b:lab.b};
         this._activeFilters = [];
+        this._onColorChangeListeners = [];
         this.convert(this.convertor.CielabToRGB);
         this.generateGrayscaleColor();
     };    
+        
+    Color.prototype.debug = false;
         
     /**
      * Cielab Variable
@@ -124,9 +128,31 @@ this.colors = this.colors || {};
      * Debug 
      */
     Color.prototype.toString = function() {
+        var H = 0, C = 0;
+        if(this.debug){
+            C = Math.sqrt(Math.pow(this.lab.a, 2)+ Math.pow(this.lab.b, 2));
+            if(this.lab.a < 0 && this.lab.b > 0 ){
+               H = 180 + Math.atan(this.lab.b/this.lab.a) * 180 / Math.PI;
+            } else if( this.lab.a < 0 && this.lab.b < 0 ){
+               H = 180+Math.atan(this.lab.b/this.lab.a)*180/Math.PI;
+            }else if( this.lab.a > 0 && this.lab.b < 0){ 
+               H = 360 + Math.atan(this.lab.b/this.lab.a) * 180/Math.PI;
+            }else {
+               H = Math.atan(this.lab.b/this.lab.a) *180 / Math.PI;
+            }
+            
+            return "L:"+(parseFloat(this.lab.L).toFixed(2))+", "+
+               "a:"+(parseFloat(this.lab.a).toFixed(2))+", "+
+               "b:"+(parseFloat(this.lab.b).toFixed(2))+", "+
+               "C:"+(parseFloat(C).toFixed(2))+", "+
+               "H:"+(parseFloat(H).toFixed(2));
+
+        }
+        
         return "L:"+(parseFloat(this.lab.L).toFixed(2))+", "+
                "a:"+(parseFloat(this.lab.a).toFixed(2))+", "+
-               "b:"+(parseFloat(this.lab.b).toFixed(2));
+               "b:"+(parseFloat(this.lab.b).toFixed(2));        
+        
     };
 
     /**
@@ -134,9 +160,25 @@ this.colors = this.colors || {};
      * @param {type} method
      * @returns {undefined}
      */
-    Color.prototype.convert = function(method) {
-        method.apply(this);
+    Color.prototype.convert = function(method) {        
+        method.apply(this);            
     };    
+
+    /**
+     * Aplitude of segments
+     */
+    Color.prototype.addOnColorChangeListeners = function(listener){
+        if(listener.hasOwnProperty("onColorChange"))
+            this._onColorChangeListeners.push(listener);
+    };
+    
+    Color.prototype.fireOnColorChange= function(){        
+        for(var i = 0; i < this._onColorChangeListeners.length; i++){
+            if(this._onColorChangeListeners[i].hasOwnProperty("onColorChange"))
+                this._onColorChangeListeners[i].onColorChange(this);
+        }
+    };    
+    
     
     /**
      * Activate filter for an object
@@ -144,10 +186,8 @@ this.colors = this.colors || {};
      * @returns {undefined}
      */
     Color.prototype.addFilter = function(filter){     
-        console.info("add filter", filter);
         this._activeFilters.push(filter);
         if(filter.init){
-            console.info("call init filter");
             filter.init.apply(this);
         }
         
@@ -162,7 +202,6 @@ this.colors = this.colors || {};
         var index = createjs.indexOf(this._activeFilters, filter);
         if( index !== -1){
             if(this._activeFilters[index].unload){
-                console.info("call unload filter");
                 this._activeFilters[index].unload.apply(this);
             }
             this._activeFilters.splice(index, 1);
@@ -208,14 +247,9 @@ this.colors = this.colors || {};
      */
     Color.Lighting = {
                         
-        init: function(){
-            this.alphaL = 1;
-            console.info("init", this, this.alphaL);
-        },
+        init: function(){},
         
         unload: function(){
-            console.info("call unload");
-            delete this.alphaL;
             this.lab = {
                 L: this.labMid.L,
                 a: this.labMid.a,
@@ -227,36 +261,35 @@ this.colors = this.colors || {};
         
         increaseLighting: function(value){
             //se ho raggiunto il valore massimo ritorno
-            if(+(this.alphaL) * +(this.labMid.L) >= 100){
+            if(+(this.lab.L) + +(value) > 100){
                 return;
             }
             
-            //alfa aumenta per rendere il colore sempre più vicino al bianco
-            this.alphaL = this.alphaL + (value/100);                
             // se va oltre 1 riporta a 1
-            var Lris = (+(this.alphaL) * +(this.labMid.L));
-            this.lab.L = Math.min(100, +(Lris));
-
+            var Lris = +(this.lab.L) + +(value);
+            this.lab.L = Math.max(0, +(Lris));
             this.convert(this.convertor.CielabToRGB);
         },
         
         decreaseLighting: function(value){
-            
-            console.info(this, this.alphaL);
-            
+
             //se ho raggiunto il valore massimo ritorno
-            if(+(this.alphaL) * +(this.labMid.L) <= 0){
+            if(+(this.lab.L) - +(value) < 0){
                 return;
             }
             
-            //alfa aumenta per rendere il colore sempre più vicino al bianco
-            this.alphaL = this.alphaL - (value/100);                
             // se va oltre 1 riporta a 1
-            var Lris = (+(this.alphaL) * +(this.labMid.L));
+            var Lris = +(this.lab.L) - +(value);
             this.lab.L = Math.max(0, +(Lris));
-
             this.convert(this.convertor.CielabToRGB);
         },
+        
+        setLighting: function(value){           
+            
+            this.lab.L = Math.max(0, Math.min(100, value));
+
+            this.convert(this.convertor.CielabToRGB);
+        }        
      
     }
     
@@ -268,7 +301,8 @@ this.colors = this.colors || {};
         
         init: function(){
             this.alphaS = 1;
-            this.alphaW = 1;            
+            this.alphaW = 1;     
+            this.alphaBW = 0;     
         },
         
         unload: function(){
@@ -281,96 +315,61 @@ this.colors = this.colors || {};
             };
             
             this.convert(this.convertor.CielabToRGB);
-        },        
+        },    
+
         
-        increaseWhite: function(value){
-            
-            if(this.alphaS === 1){
-
-		//alfa aumenta per rendere il colore sempre più vicino al bianco
-                this.alphaW = this.alphaW - (value/100);                
-		// se va oltre 1 riporta a 1
-                if(this.alphaW < 0) this.alphaW = 0;
-
-		var Lris = (+(this.alphaW) * +(this.labMid.L)) + (1 - +(this.alphaW)) * +(this.labMax.L);
-		var aris = (+(this.alphaW) * +(this.labMid.a)) + (1 - +(this.alphaW)) * +(this.labMax.a);
-		var bris = (+(this.alphaW) * +(this.labMid.b)) + (1 - +(this.alphaW)) * +(this.labMax.b);
+        _setColor: function(){
+            if(this.alphaBW >= 0){
+                                
+                var alpha = Math.abs(this.alphaBW);
+		var Lris = (+(1 - alpha) * +(this.labMid.L)) + (alpha * +(this.labMax.L));
+		var aris = (+(1 - alpha) * +(this.labMid.a)) + (alpha * +(this.labMax.a));
+		var bris = (+(1 - alpha) * +(this.labMid.b)) + (alpha * +(this.labMax.b));
                 
                 this.lab = {
                     L: +(Lris),
                     a: +(aris),
                     b: +(bris)
                 };
-
+                
                 this.convert(this.convertor.CielabToRGB);
-            }            
-        },
-        
-        decreaseWhite: function(value){
-            
-            if(this.alphaS === 1){
-
-		//alfa aumenta per rendere il colore sempre più vicino al bianco
-                this.alphaW = +(this.alphaW) + (value/100);                
-		// se va oltre 1 riporta a 1
-                if(this.alphaW > 1) this.alphaW = 1;
-
-		var Lris = (+(this.alphaW) * +(this.labMid.L)) + (1 - +(this.alphaW)) * +(this.labMax.L);
-		var aris = (+(this.alphaW) * +(this.labMid.a)) + (1 - +(this.alphaW)) * +(this.labMax.a);
-		var bris = (+(this.alphaW) * +(this.labMid.b)) + (1 - +(this.alphaW)) * +(this.labMax.b);
+            } else {
+                var alpha = Math.abs(this.alphaBW);
+                var Lris = (+(1 - alpha) * +(this.labMid.L)) + (alpha * +(this.labMin.L));  
+                var aris = (+(1 - alpha) * +(this.labMid.a)) + (alpha * +(this.labMin.a));
+                var bris = (+(1 - alpha) * +(this.labMid.b)) + (alpha * +(this.labMin.b));
 
                 this.lab = {
                     L: +(Lris),
                     a: +(aris),
                     b: +(bris)
                 };
-
-                this.convert(this.convertor.CielabToRGB);
-            }      
-        },
-        
-        increaseBlack: function(value){
-            
-            if(this.alphaW === 1){
                 
-                this.alphaS = this.alphaS - (value/100);
-                if(this.alphaS < 0) this.alphaS = 0;
-
-                var Lris = (this.alphaS * +(this.labMid.L)) + (1 - this.alphaS) * +(this.labMin.L);  
-                var aris = (this.alphaS * +(this.labMid.a)) + (1 - this.alphaS) * +(this.labMin.a);
-                var bris = (this.alphaS * +(this.labMid.b)) + (1 - this.alphaS) * +(this.labMin.b);
-
-                this.lab = {
-                    L: +(Lris),
-                    a: +(aris),
-                    b: +(bris),
-                };
-                
-                this.convert(this.convertor.CielabToRGB);
-            }
-        },
-        
-        decreaseBlack: function(value){
-            if(this.alphaW === 1){
-
-                this.alphaS = this.alphaS + (value/100);
-                if(this.alphaS > 1) this.alphaS = 1;
-                
-                var Lris = (this.alphaS * +(this.labMid.L)) + (1 - this.alphaS) * +(this.labMin.L);
-                var aris = (this.alphaS * +(this.labMid.a)) + (1 - this.alphaS) * +(this.labMin.a);
-                var bris = (this.alphaS * +(this.labMid.b)) + (1 - this.alphaS) * +(this.labMin.b);
-                
-                this.lab = {
-                    L: +(Lris),
-                    a: +(aris),
-                    b: +(bris),
-                };
-
                 this.convert(this.convertor.CielabToRGB);                
-            }
-        }   
+            }           
+        },
         
-    }
+        
+        increaseBlackWhite: function(value){            
+            this.alphaBW = this.alphaBW + (value/100);
+            if(this.alphaBW > 1) this.alphaBW = 1;
+            Color.BlackWhite._setColor.call(this);
+        },
+        
+        decreaseBlackWhite: function(value){
+            this.alphaBW = this.alphaBW - (value/100);
+            if(this.alphaBW < -1) this.alphaBW = -1;
+            Color.BlackWhite._setColor.call(this);
+        },
+        
+        setBlackWhite: function(value){           
+            this.alphaBW = (value/100);
+            if(this.alphaBW < -1) this.alphaBW = -1;
+            if(this.alphaBW > 1) this.alphaBW = 1;
+            Color.BlackWhite._setColor.call(this);
+        }
+
+    };
 
     /**
      * Expose filters to color class
@@ -386,25 +385,14 @@ this.colors = this.colors || {};
      */
     Color.Convertor = {
 
-        monitor : (function(){
-            
-            //dati monitor QUATO TFT mio
-            var xR = 0.64, //0.644,
-                yR = 0.33, //0.324,
-                zR = 0.03, // 1 - 0.644 - 0.324,
-                xG = 0.30, //0.298,
-                yG = 0.60, //0.61,
-                zG = 0.1, // 1 - 0.298 - 0.61,
-                xB = 0.15, // 0.141,
-                yB = 0.06, // 0.061,
-                zB = 0.79, // 1 - 0.141 - 0.061,
-                xW = 0.3127, //0.3144,   //0.313
-                yW = 0.329, //0.33,     //0.329
-                zW = 0.3583, //1 - 0.3144 - 0.33,
-                gamma_R = 2.2,
-                gamma_G = 2.2,
-                gamma_B = 2.2;
-
+        monitor : {}, 
+        
+        calibrate: function(xR, yR, zR,
+                            xG, yG, zG,
+                            xB, yB, zB,
+                            xW, yW, zW,
+                            gamma_R, gamma_G, gamma_B ){
+        
             //matrice originale
             var matrix = new colors.Matrix3();
             matrix.setAll([xR, xG, xB, yR, yG, yB, zR, zG ,zB]);            
@@ -438,7 +426,7 @@ this.colors = this.colors || {};
             //matrice  inversa per trasf. da XYZ a RGB 
             invers.copy(matrix).invert();
                 
-            return {
+            Color.Convertor.monitor = {
                 WX: WX,
                 WY: WY,
                 WZ: WZ,
@@ -448,8 +436,8 @@ this.colors = this.colors || {};
                 //matrix
                 matrix : matrix,
                 invers: invers                
-            };
-        })(),
+            };            
+        },        
 
         /**
          * Calculates HSL Color
@@ -476,6 +464,8 @@ this.colors = this.colors || {};
                 }
                 this.hsl.h /= 6;
             }
+            
+            this.fireOnColorChange();
         },
 
         /**
@@ -505,6 +495,8 @@ this.colors = this.colors || {};
                 this.rgb.g = hue2rgb(p, q, h);
                 this.rgb.b = hue2rgb(p, q, h - 1/3);
             }
+            
+            this.fireOnColorChange();
         },
         
         /**
@@ -587,6 +579,8 @@ this.colors = this.colors || {};
             this.rgb.r = Math.min(Math.max(R1, 0), 255);
             this.rgb.g = Math.min(Math.max(G1, 0), 255);
             this.rgb.b = Math.min(Math.max(B1, 0), 255);
+            
+            this.fireOnColorChange();
 
             return this.rgb;
 
@@ -602,6 +596,28 @@ this.colors = this.colors || {};
         }
 
     };
+    
+            
+    (function(){            
+            Color.Convertor.calibrate(
+                0.64,   // xR
+                0.33,   // yR
+                0.03,   // zR
+                0.30,   // xG
+                0.60,   // yG
+                0.1,    // zG
+                0.15,   // xB
+                0.06,   // yB
+                0.79,   // zB
+                0.3127, // xW
+                0.329,  // yW
+                0.3583, // zW
+                2.2, //gamma_R
+                2.2, // gamma_G
+                2.2  //gamma_B
+            );
+    })();
+    
     
     Color.prototype.convertor = Color.Convertor;
     

@@ -48,4 +48,44 @@ abstract class TestController extends Controller{
 
     }    
     
+    
+    protected function readCalibrations(){
+        $calibration = parse_ini_file(CALIBRAZIONE);
+        return array(
+            $calibration['xR'],
+            $calibration['yR'],
+            $calibration['zR'],
+            $calibration['xG'],
+            $calibration['yG'],
+            $calibration['zG'],
+            $calibration['xB'],
+            $calibration['yB'],
+            $calibration['zB'],
+            $calibration['xW'],
+            $calibration['yW'],
+            $calibration['zW'],
+            $calibration['gamma_R'],
+            $calibration['gamma_G'],
+            $calibration['gamma_B'],
+        );
+    }        
+    
+    
+    protected function writeResult($output){
+        
+        $filename = date("y-m-d", time()).".txt";
+        $fp = fopen(APPLICATION_RESULTS."/".$filename, "a+");
+
+        if (flock($fp, LOCK_EX)) { // do an exclusive lock
+            fwrite($fp, $output);
+            flock($fp, LOCK_UN); // release the lock
+        } else {
+            echo "Couldn't lock the file !";
+        }
+
+        fclose($fp);
+        
+        return $filename;
+    }
+    
 }

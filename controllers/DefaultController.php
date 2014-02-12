@@ -8,12 +8,14 @@ class DefaultController extends Controller{
         
         $session = $this->getSession();
 
-        if(isset($session['TestWS'])){
-            $this->template->statusTestWS = $session['TestWS']['status'];            
+        if(isset($session['TestWS']) && $session['TestWS']['status'] == 'complete'){
+            $this->template->statusTestWS = $session['TestWS']['status'];   
+            $this->template->outputTestWS = $session['TestWS']['output'];   
         }
         
-        if(isset($session['TestL'])){ 
+        if(isset($session['TestL']) && $session['TestL']['status'] == 'complete'){ 
             $this->template->statusTestL = $session['TestL']['status'];
+            $this->template->outputTestL = $session['TestL']['output'];
         }        
         
         if(Controller::isAjaxRequest()){
@@ -29,11 +31,14 @@ class DefaultController extends Controller{
         }
                 
         $status = false;
+        $session = $this->getSession();
         if($this->getSession() !== null){
+            $session['lastAccess'] = time();
+            $this->setSession($session);
             $status = true;
         }
         
-        echo json_encode(array('status' => $status));
+        echo json_encode(array('status' => $status, 'lastTime' => date('Y-m-d H:i', $session['lastAccess'])));
         exit();
     }
     

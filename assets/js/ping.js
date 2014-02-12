@@ -33,28 +33,30 @@
         listen: ["click", "keydown"], // events to listen for updating activity
         pingNow: false,	// If true, sends a ping request just after init
         beforeSend: null, // Callback function, called before ping (should return true. false will cancels ping query)
-        callback: false	 // Callback function, called after ping query callback received
+        callback: false, // Callback function, called after ping query callback received
+        maxTime: 0
     };
 	
     var options = {};
-    var lastUpdate, checkInterval, iTime, pingImg, _pingerLogs = true;
+    var startTime, lastUpdate, checkInterval, iTime, pingImg, _maxTime, _pingerLogs = true;
 	
     /* Public methods */
     var methods = {
         init: function( settings ) {
+            startTime = (new Date()).getTime();
+            _maxTime = +(options.maxTime * 60 * 1000);	
             options = $.extend(true, defaults, settings);
  
             if (!options.url) {
                 $.error( 'jQuery.pinger: url parameter is mandatory');
                 return;
             }
-
+            
             if ( options.interval > 0 ) {
-
                 lastUpdate = 0;
                 iTime = (options.interval * 60 * 1000);			
                 checkInterval = setInterval( function(){
-                    if ( ( (new Date()).getTime() - lastUpdate) > iTime ) {
+                    if (_maxTime > 0 && startTime + _maxTime < (new Date()).getTime() ) {
                         stop('timeout');
                     } else {
                         ping('interval');
